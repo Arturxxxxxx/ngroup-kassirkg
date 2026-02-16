@@ -31,8 +31,6 @@ def create_application_public(
         raise bad_request("consent must be true")
     if dto.is_investor and len(dto.objects) == 0:
         raise bad_request("objects must be non-empty for investor")
-    if dto.children_total != len(dto.children):
-        raise bad_request("children_total must match count(children)")
     if len(files) != len(dto.children):
         raise bad_request("files count must match children count")
 
