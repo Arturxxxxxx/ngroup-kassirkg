@@ -11,7 +11,12 @@ import app.models  # noqa: F401
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="N Kids Land API")
+    app = FastAPI(
+        title="N Kids Land API",
+        root_path="/api",          # <= важно для nginx location /api/
+        docs_url="/docs",
+        openapi_url="/openapi.json",
+    )
 
     app.add_middleware(
         CORSMiddleware,
