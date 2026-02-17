@@ -173,3 +173,4 @@ def admin_get_file(file_id: uuid.UUID, db: Session = Depends(get_db), actor: str
         raise not_found("File missing on disk")
 
     return FileResponse(path=str(abs_path), media_type=f.mime, filename=f.original_name)
+

@@ -39,7 +39,7 @@ class ApplicationListItem(BaseModel):
     contract_number: Optional[str]
     children_total: int
     children_coming: int
-    email: str
+    email: Optional[str] = None
     status: str
     created_at: datetime
 
@@ -62,7 +62,7 @@ class ApplicationDetail(BaseModel):
     id: UUID
     full_name: str
     whatsapp_phone: str
-    email: str
+    email: Optional[str] = None
     is_investor: bool
     objects: List[str]
     contract_number: Optional[str]
