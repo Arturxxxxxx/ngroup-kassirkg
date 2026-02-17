@@ -29,6 +29,7 @@ def list_applications(
     phone_search: Optional[str],
     created_from: Optional[datetime],
     created_to: Optional[datetime],
+    email: Optional[str],
 ):
     q = db.query(Application)
 

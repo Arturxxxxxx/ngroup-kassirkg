@@ -12,6 +12,7 @@ class ChildCreate(BaseModel):
 class ApplicationCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=255)
     whatsapp_phone: str = Field(min_length=5, max_length=64)
+    email: str = Field(min_length=5, max_length=64)
 
     is_investor: bool
     objects: List[str] = Field(default_factory=list)
@@ -38,6 +39,7 @@ class ApplicationListItem(BaseModel):
     contract_number: Optional[str]
     children_total: int
     children_coming: int
+    email: str
     status: str
     created_at: datetime
 
@@ -60,6 +62,7 @@ class ApplicationDetail(BaseModel):
     id: UUID
     full_name: str
     whatsapp_phone: str
+    email: str
     is_investor: bool
     objects: List[str]
     contract_number: Optional[str]

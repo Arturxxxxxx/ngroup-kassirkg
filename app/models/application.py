@@ -20,6 +20,7 @@ class Application(Base):
 
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     whatsapp_phone: Mapped[str] = mapped_column(String(64), nullable=False)
+    email: Mapped[str] = mapped_column(String(225), nullable=False, index=True)
 
     is_investor: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     objects: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
