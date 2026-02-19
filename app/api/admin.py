@@ -67,6 +67,7 @@ def admin_list_applications(
     items = [
         ApplicationListItem(
             id=r.id,
+            base_id=r.base_id,
             full_name=r.full_name,
             whatsapp_phone=r.whatsapp_phone,
             is_investor=r.is_investor,

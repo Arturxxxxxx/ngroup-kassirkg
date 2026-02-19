@@ -5,6 +5,7 @@ from sqlalchemy import String, Boolean, Integer, DateTime, Enum
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.db import Base
+from sqlalchemy import Identity
 
 
 class ApplicationStatus(str, enum.Enum):
@@ -17,6 +18,7 @@ class Application(Base):
     __tablename__ = "applications"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    base_id: Mapped[int] = mapped_column(Integer, Identity(start=1, cycle=False), unique=True)
 
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     whatsapp_phone: Mapped[str] = mapped_column(String(64), nullable=False)
