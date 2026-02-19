@@ -38,6 +38,7 @@ def create_application_public(
         validate_upload(f)
 
     app = Application(
+        email=dto.email,
         full_name=dto.full_name,
         whatsapp_phone=dto.whatsapp_phone,
         is_investor=dto.is_investor,
