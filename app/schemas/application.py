@@ -32,7 +32,6 @@ class ApplicationCreateResponse(BaseModel):
 
 class ApplicationListItem(BaseModel):
     id: UUID
-    base_id: int
     full_name: str
     whatsapp_phone: str
     is_investor: bool
@@ -75,3 +74,6 @@ class ApplicationDetail(BaseModel):
     created_at: datetime
     children: List[ChildView]
 
+
+class ApplicationUIDS(BaseModel):
+    uid_list: List[UUID]

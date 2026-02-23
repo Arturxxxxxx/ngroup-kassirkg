@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -12,10 +12,11 @@ from app.core.exceptions import bad_request, not_found
 
 from app.models import ApplicationStatus, AuditLog
 
-from app.schemas.application import ApplicationListResponse, ApplicationListItem, ApplicationDetail, ChildView
+from app.schemas.application import ApplicationListResponse, ApplicationListItem, ApplicationDetail, ChildView, ApplicationUIDS
 from app.schemas.admin import RejectApplicationRequest
 from app.repositories.application_repo import list_applications, get_application_detail
 from app.repositories.file_repo import get_file
+from app.services.application_service import reject_list_applications, accept_list_applications, make_new_list_applications, delete_list_applications
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -67,7 +68,6 @@ def admin_list_applications(
     items = [
         ApplicationListItem(
             id=r.id,
-            base_id=r.base_id,
             full_name=r.full_name,
             whatsapp_phone=r.whatsapp_phone,
             is_investor=r.is_investor,
@@ -137,7 +137,7 @@ def admin_approve_application(app_id: uuid.UUID, db: Session = Depends(get_db), 
     return {"ok": True}
 
 
-@router.post("/applications/{app_id}/reject")
+@router.patch("/applications/{app_id}/reject")
 def admin_reject_application(
     app_id: uuid.UUID,
     payload: RejectApplicationRequest,
@@ -161,6 +161,46 @@ def admin_reject_application(
 
     db.commit()
     return {"ok": True}
+
+
+@router.patch('/applications-list/reject')
+def admin_list_reject_applications(
+    payload: ApplicationUIDS = Body(...),
+    db: Session = Depends(get_db),
+    actor: str = Depends(require_admin)
+):
+    errors = reject_list_applications(db, payload.uid_list)
+    return {"errors": errors} if errors else {"ok": True}
+
+
+@router.patch('/applications-list/accept')
+def admin_list_accept_applications(
+    payload: ApplicationUIDS = Body(...),
+    db: Session = Depends(get_db),
+    actor: str = Depends(require_admin)
+):
+    errors = accept_list_applications(db, payload.uid_list)
+    return {"errors": errors} if errors else {"ok": True}
+
+
+@router.patch('/applications-list/delete')
+def admin_list_delete_applications(
+    payload: ApplicationUIDS = Body(...),
+    db: Session = Depends(get_db),
+    actor: str = Depends(require_admin)
+):
+    errors = delete_list_applications(db, payload.uid_list)
+    return {"errors": errors} if errors else {"ok": True}
+
+
+@router.patch('/applications-list/to_new')
+def admin_list_new_applications(
+    payload: ApplicationUIDS = Body(...),
+    db: Session = Depends(get_db),
+    actor: str = Depends(require_admin)
+):
+    errors = make_new_list_applications(db, payload.uid_list)
+    return {"errors": errors} if errors else {"ok": True}
 
 
 @router.get("/files/{file_id}")
