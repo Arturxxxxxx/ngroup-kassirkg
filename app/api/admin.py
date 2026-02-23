@@ -34,7 +34,7 @@ def admin_login(body: dict):
 @router.get("/applications", response_model=ApplicationListResponse)
 def admin_list_applications(
     page: int = 1,
-    per_page: int = 50,
+    per_page: int = 1000,
     status: str | None = None,
     is_investor: bool | None = None,
     object: str | None = None,
