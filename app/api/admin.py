@@ -45,7 +45,7 @@ def admin_list_applications(
     db: Session = Depends(get_db),
     actor: str = Depends(require_admin),
 ):
-    if page < 1 or per_page < 1 or per_page > 300:
+    if page < 1 or per_page < 1 or per_page > 1001:
         raise bad_request("Invalid pagination")
 
     dt_from = datetime.fromisoformat(created_from) if created_from else None
