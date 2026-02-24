@@ -16,8 +16,15 @@ router = APIRouter(prefix="/public", tags=["public"])
 
 @router.post("/applications", response_model=ApplicationCreateResponse)
 def create_application_public(
-    payload: str = Form(...),                        # JSON string
-    files: list[UploadFile] = UploadFileParam(...),  # files[] count == children count
+    payload: str = Form(...),
+
+    # старый формат
+    files: list[UploadFile] | None = UploadFileParam(default=None),
+
+    # новый формат
+    files1: list[UploadFile] | None = UploadFileParam(default=None),
+    files2: list[UploadFile] | None = UploadFileParam(default=None),
+
     db: Session = Depends(get_db),
 ):
     try:
@@ -31,11 +38,37 @@ def create_application_public(
         raise bad_request("consent must be true")
     if dto.is_investor and len(dto.objects) == 0:
         raise bad_request("objects must be non-empty for investor")
-    if len(files) != len(dto.children):
-        raise bad_request("files count must match children count")
 
-    for f in files:
+    # нормализуем вход к двум массивам
+    if files1 is None and files2 is None:
+        # старый формат обязателен: files
+        if not files:
+            raise bad_request("files (old) or files1/files2 (new) are required")
+        if len(files) != len(dto.children):
+            raise bad_request("files count must match children count")
+        f1_list = files
+        f2_list = [None] * len(files)
+    else:
+        # новый формат: files1 обязателен, files2 можно сделать опциональным
+        if not files1:
+            raise bad_request("files1 is required")
+        if len(files1) != len(dto.children):
+            raise bad_request("files1 count must match children count")
+
+        if files2 is None:
+            files2 = [None] * len(files1)
+        elif len(files2) != len(dto.children):
+            raise bad_request("files2 count must match children count")
+
+        f1_list = files1
+        f2_list = files2
+
+    # валидация
+    for f in f1_list:
         validate_upload(f)
+    for f in f2_list:
+        if f is not None:
+            validate_upload(f)
 
     app = Application(
         email=dto.email,
@@ -53,15 +86,25 @@ def create_application_public(
         app.children.append(Child(full_name=c.full_name, age=c.age))
 
     create_application(db, app)
-    db.flush()  # children ids available
+    db.flush()
 
     for idx, child in enumerate(app.children):
-        upload = files[idx]
-        file_id = uuid.uuid4()
-        rel_path, size = save_upload_to_disk(file_id, upload)
-        f_entity = file_entity(file_id, rel_path, upload, size)
-        create_file(db, f_entity)
-        child.birth_cert_file_id = f_entity.id
+        # файл 1 (всегда)
+        upload1 = f1_list[idx]
+        file_id1 = uuid.uuid4()
+        rel1, size1 = save_upload_to_disk(file_id1, upload1)
+        fe1 = file_entity(file_id1, rel1, upload1, size1)
+        create_file(db, fe1)
+        child.birth_cert_file_id = fe1.id
+
+        # файл 2 (опционально)
+        upload2 = f2_list[idx]
+        if upload2 is not None:
+            file_id2 = uuid.uuid4()
+            rel2, size2 = save_upload_to_disk(file_id2, upload2)
+            fe2 = file_entity(file_id2, rel2, upload2, size2)
+            create_file(db, fe2)
+            child.birth_cert_file2_id = fe2.id
 
     db.commit()
     return ApplicationCreateResponse(application_id=app.id, status=app.status.value)

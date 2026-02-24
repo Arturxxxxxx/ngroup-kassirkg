@@ -56,6 +56,7 @@ class ChildView(BaseModel):
     full_name: str
     age: int
     path_image: str
+    path_image2: Optional[str] = None
 
 
 class ApplicationDetail(BaseModel):

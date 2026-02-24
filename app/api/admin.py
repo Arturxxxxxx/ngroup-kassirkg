@@ -108,7 +108,8 @@ def admin_get_application(app_id: uuid.UUID, db: Session = Depends(get_db), acto
                 id=c.id,
                 full_name=c.full_name,
                 age=c.age,
-                path_image=(f"/admin/files/{c.birth_cert_file_id}")
+                path_image=(f"/admin/files/{c.birth_cert_file_id}"),
+                path_image2=(f"/admin/files/{c.birth_cert_file2_id}" if getattr(c, "birth_cert_file2_id", None) else None),
             )
             for c in app.children
         ],
