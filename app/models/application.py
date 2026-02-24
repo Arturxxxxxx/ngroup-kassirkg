@@ -5,6 +5,7 @@ from sqlalchemy import String, Boolean, Integer, DateTime, Enum
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.db import Base
+from sqlalchemy import Identity
 
 
 class ApplicationStatus(str, enum.Enum):

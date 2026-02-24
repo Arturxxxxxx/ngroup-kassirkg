@@ -75,3 +75,6 @@ class ApplicationDetail(BaseModel):
     created_at: datetime
     children: List[ChildView]
 
+
+class ApplicationUIDS(BaseModel):
+    uid_list: List[UUID]

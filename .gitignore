@@ -11,3 +11,5 @@ __pycache__/
 .DS_Store
 storage/
 *.log
+.ssh
+.ssh.pub
