@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import exists, func
 from app.models import Application
 from datetime import datetime
 from typing import Optional
@@ -58,3 +59,12 @@ def list_applications(
         .all()
     )
     return total, items
+
+
+def application_exists(db: Session, email: str) -> bool:
+    return bool(
+        db.query(
+            exists().where(func.lower(Application.email) == email)
+        ).scalar()
+    )
+

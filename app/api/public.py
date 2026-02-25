@@ -1,15 +1,16 @@
 import json
 import uuid
-from fastapi import APIRouter, Depends, UploadFile, File as UploadFileParam, Form
+from fastapi import APIRouter, Depends, UploadFile, File as UploadFileParam, Form, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.exceptions import bad_request
 from app.models import Application, Child
 from app.schemas.application import ApplicationCreate, ApplicationCreateResponse
-from app.repositories.application_repo import create_application
+from app.repositories.application_repo import create_application, application_exists
 from app.repositories.file_repo import create_file
 from app.services.storage_service import validate_upload, save_upload_to_disk, file_entity
+from app.services.normalize import norm_email
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -108,3 +109,11 @@ def create_application_public(
 
     db.commit()
     return ApplicationCreateResponse(application_id=app.id, status=app.status.value)
+
+
+@router.get("/registrations/check")
+def check_registration(email: str = Query(..., min_length=3), db: Session = Depends(get_db)):
+    e = norm_email(email)
+    if not e:
+        raise bad_request("email required")
+    return {"registered": application_exists(db, e)}
