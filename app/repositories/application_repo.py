@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import exists, func
-from app.models import Application
+from sqlalchemy import exists, func, case
+from app.models import Application, ApplicationStatus
 from datetime import datetime
 from typing import Optional
 
@@ -61,10 +61,24 @@ def list_applications(
     return total, items
 
 
-def application_exists(db: Session, email: str) -> bool:
-    return bool(
-        db.query(
-            exists().where(func.lower(Application.email) == email)
-        ).scalar()
+def get_registration_status_by_email(db: Session, email: str):
+    # приоритет статусов
+    priority = case(
+        (Application.status == ApplicationStatus.APPROVED, 1),
+        (Application.status == ApplicationStatus.NEW, 2),
+        (Application.status == ApplicationStatus.REJECTED, 3),
+        else_=4,
     )
+
+    row = (
+        db.query(Application.status)
+        .filter(Application.email == email)
+        .order_by(priority)
+        .first()
+    )
+
+    if not row:
+        return None
+
+    return row.status.value
 

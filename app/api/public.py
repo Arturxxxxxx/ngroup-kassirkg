@@ -7,10 +7,10 @@ from app.core.db import get_db
 from app.core.exceptions import bad_request
 from app.models import Application, Child
 from app.schemas.application import ApplicationCreate, ApplicationCreateResponse
-from app.repositories.application_repo import create_application, application_exists
+from app.repositories.application_repo import create_application, get_registration_status_by_email
 from app.repositories.file_repo import create_file
 from app.services.storage_service import validate_upload, save_upload_to_disk, file_entity
-from app.services.normalize import norm_email
+
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -112,8 +112,19 @@ def create_application_public(
 
 
 @router.get("/registrations/check")
-def check_registration(email: str = Query(..., min_length=3), db: Session = Depends(get_db)):
-    e = norm_email(email)
-    if not e:
+def check_registration(
+    email: str = Query(..., min_length=3),
+    db: Session = Depends(get_db),
+):
+    if not email:
         raise bad_request("email required")
-    return {"registered": application_exists(db, e)}
+
+    status = get_registration_status_by_email(db, email)
+
+    if not status:
+        return {"registered": False}
+
+    return {
+        "registered": True,
+        "status": status  # APPROVED / NEW / REJECTED
+    }
