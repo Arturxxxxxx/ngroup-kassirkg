@@ -35,7 +35,7 @@ def admin_login(body: dict):
 @router.get("/applications", response_model=ApplicationListResponse)
 def admin_list_applications(
     page: int = 1,
-    per_page: int = 1000,
+    per_page: int = 3000,
     status: str | None = None,
     is_investor: bool | None = None,
     object: str | None = None,
@@ -46,7 +46,7 @@ def admin_list_applications(
     db: Session = Depends(get_db),
     actor: str = Depends(require_admin),
 ):
-    if page < 1 or per_page < 1 or per_page > 1001:
+    if page < 1 or per_page < 1 or per_page > 3500:
         raise bad_request("Invalid pagination")
 
     dt_from = datetime.fromisoformat(created_from) if created_from else None
