@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import exists, func, case
+from sqlalchemy import exists, func, case, desc
 from app.models import Application, ApplicationStatus
 from datetime import datetime
 from typing import Optional
@@ -51,9 +51,20 @@ def list_applications(
     if created_to:
         q = q.filter(Application.created_at <= created_to)
 
+    priority = case(
+        (Application.status == ApplicationStatus.APPROVED, 1),
+        (Application.status == ApplicationStatus.NEW, 2),
+        (Application.status == ApplicationStatus.REJECTED, 3),
+        else_=4,
+    )
+
     total = q.count()
     items = (
-        q.order_by(Application.created_at.desc())
+        q.order_by(
+            priority.asc(),
+    desc(Application.updated_at).nullslast(),
+            desc(Application.created_at).nullslast(),
+        )
         .offset((page - 1) * per_page)
         .limit(per_page)
         .all()
